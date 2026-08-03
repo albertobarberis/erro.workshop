@@ -3,7 +3,7 @@ let arrayOfSounds = []; // all currently playing Sounds
 
 const ATTACK_TIME = 0.02; // how long a Sound takes to fade in
 const RELEASE_TIME = 0.02; // how long a Sound takes to fade out when removed
-const STEP_DURATION = 0.1; // seconds per rhythm step (smaller = faster)
+let STEP_DURATION = 0.1; // seconds per rhythm step (smaller = faster)
 const GATE_RATIO = 0.5; // fraction of each step the note stays "on" before fading
 const DETUNE_HZ = 10; // detuning in Hz
 
@@ -15,6 +15,12 @@ function fetchOneReference(){ // get ONE random reference's text from the server
 
 function startAudio(){ // create the audio context on first keypress
     audioContext = new AudioContext();
+}
+
+function chooseOscType() {
+    oscList = ["sine", "square", "sawtooth", "triangle"]
+    const randomIndex = Math.floor(Math.random() * oscList.length);
+    return (oscList[randomIndex]);
 }
 
 class Sound{
@@ -40,8 +46,18 @@ class Sound{
 
         // build the oscillator: freq -> gain -> speakers
         this.mainOsc = audioContext.createOscillator();
-        this.mainOsc.type = "sine";
+        this.mainOsc.type = chooseOscType();
+        console.log(this.mainOsc.type);
+        
+        //tuning sines up so they're listenable in tiny speakers
+        if (this.mainOsc.type == "sine") {
+            if (this.freq < 300) {
+                this.freq *= 10;
+            }
+        }
+
         this.mainOsc.frequency.value = this.freq;
+        
         this.mainOsc.start();
 
         this.mainOscGain = audioContext.createGain();
@@ -142,3 +158,23 @@ function mousePressed(){ // click a Sound's text to remove it
 function mouseDragged(){
     mousePressed(); // dragging over a Sound also removes it
 }
+
+function oscillatorTypeChange() {
+    for (sound of arrayOfSounds) {
+        while (sound.mainOsc.type == chooseOscType()) {
+            sound.mainOsc.type = chooseOscType();
+        }
+    }
+}
+
+function stepDurationChange() {
+    STEP_DURATION = Math.random() * 2;
+}
+
+const stepDurationChangeLoop = setInterval(() => {
+    let result = eval(stepDurationChange());
+}, Math.random() * 200)
+
+const oscillatorTypeChangeLoop = setInterval(() => {
+  let result = eval(oscillatorTypeChange());
+}, Math.random() * 500);
