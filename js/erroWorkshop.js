@@ -171,10 +171,18 @@ function stepDurationChange() {
     STEP_DURATION = Math.random() * 2;
 }
 
-const stepDurationChangeLoop = setInterval(() => {
-    let result = eval(stepDurationChange());
-}, Math.random() * 200)
 
-const oscillatorTypeChangeLoop = setInterval(() => {
-  let result = eval(oscillatorTypeChange());
-}, Math.random() * 500);
+function stepDurationChangeLoop() {
+    let result = eval(stepDurationChange());
+    
+    //random lengths of change from 0 to 200
+    setTimeout(stepDurationChangeLoop, Math.random() * 200);
+}
+stepDurationChangeLoop();
+
+function oscillatorTypeChangeLoop() {
+    let result = eval(oscillatorTypeChange());
+    
+    setTimeout(oscillatorTypeChangeLoop, Math.random() * 500);
+}
+oscillatorTypeChangeLoop();
